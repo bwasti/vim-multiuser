@@ -26,17 +26,18 @@ def parse_data(data):
         pass
 
 class MultiUserSession(asynchat.async_chat):
-    def __init__(self, sock, server):
+    def __init__(self, sock, server, session_id):
         asynchat.async_chat.__init__(self, sock)
         self.server = server
         self.ibuffer = []
         self.obuffer = ""
         self.vbuffer = []
         self.set_terminator("\r\n\r\n")
+        self.session_id = session_id
     
     def collect_incoming_data(self, data):
         self.ibuffer.append(data)
-        self.server.broadcast(data)
+        self.server.broadcast(data, self.session_id)
         parse_data(data)
 
     def found_terminator(self):
@@ -55,12 +56,14 @@ class MultiUserServer(asyncore.dispatcher):
         self.set_reuse_addr()
         self.bind((self.host, self.port))
         self.listen(5)
+        self.session_id = 0
 
-    def broadcast(self, data):
+    def broadcast(self, data, session_id):
         global sessions
         if not sessions: return
         for i in sessions:
-            i.push(data)
+            if i.session_id != session_id:
+                i.push(data)
 
     def handle_accept(self):
         pair = self.accept()
@@ -68,7 +71,8 @@ class MultiUserServer(asyncore.dispatcher):
             pass
         else:
             sock, addr = pair
-            session = MultiUserSession(sock, self)
+            self.session_id += 1
+            session = MultiUserSession(sock, self, self.session_id)
             global sessions
             session.push(json.dumps({'body':list(vim.current.buffer)}))
             sessions.append(session)
@@ -89,15 +93,25 @@ class MultiUserClientReader(asyncore.dispatcher):
         parse_data(data)
 
 class MultiUserClientSender(object):
-    def __init__(self, host, port):
+    def __init__(self, host, port, connection_type):
         self.host = host
         self.port = port
-        self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.connection.connect((host,port))
+        self.connection_type = connection_type
+        if (connection_type == 'client'):
+            self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.connection.connect((host,port))
     
     def send_message(self, message):
-        print "sending"
-        self.connection.send(json.dumps(message))
+        if (self.connection_type == 'client'):
+            self.connection.send(json.dumps(message))
+        else:
+            self.broadcast(message)
+
+    def broadcast(self, message):
+        global sessions
+        if not sessions: return
+        for i in sessions:
+            i.push(json.dumps(message))
 
 
 

@@ -5,6 +5,7 @@ from vim_multiuser_server import *
 
 old_buffer = []
 emitter = None
+connection_type = ""
 
 class MultiUserMain(object):
     def __init__(self, connection_type, host, port):
@@ -17,7 +18,7 @@ class MultiUserMain(object):
 
     def run(self):
         self.thread.start()
-        start_multiuser_emitter(self.host, self.port)
+        start_multiuser_emitter(self.host, self.port, self.connection_type)
         return
 
     def main_loop(self):
@@ -35,9 +36,11 @@ def start_multiuser_client(host, port):
     multiuser = MultiUserMain('client', host, port)
     multiuser.run()
 
-def start_multiuser_emitter(host, port):
+def start_multiuser_emitter(host, port, conn_type):
     global emitter
-    emitter = MultiUserClientSender(host, port)
+    global connection_type
+    connection_type = conn_type
+    emitter = MultiUserClientSender(host, port, conn_type)
 
 def multiuser_client_send():
     global old_buffer
@@ -45,7 +48,14 @@ def multiuser_client_send():
     current_buffer = list(vim.current.buffer)
     for i in xrange(min(len(current_buffer), len(old_buffer))):
         if current_buffer[i] != old_buffer[i] and (emitter != None): 
-            #print "Before"
-            emitter.send_message({'line':current_buffer[i], 'line_num':i})
+            if connection_type == 'server':
+                emitter.send_message({'line':current_buffer[i], 'line_num':i})
+            else:
+                emitter.broadcast({'line':current_buffer[i], 'line_num':i})
             #print "After"
     old_buffer = current_buffer
+
+
+
+
+
