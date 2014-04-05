@@ -19,6 +19,6 @@ Use your plugin manager of choice.
 ## Usage
 
 - Set up a server
-  - `:MultiUserServer(port)`
+  - `:call MultiUserServer(port)`
 - Set up a client
-  - `:MultiUserServer(host, port)`
+  - `:call MultiUserServer(host, port)`
