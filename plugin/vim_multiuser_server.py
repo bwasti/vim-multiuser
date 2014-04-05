@@ -1,7 +1,8 @@
 import socket
 import asyncore, asynchat
 import sys
-#import vim
+import vim
+import json
 
 sessions = []
 
@@ -11,6 +12,7 @@ class MultiUserSession(asynchat.async_chat):
         self.server = server
         self.ibuffer = []
         self.obuffer = ""
+        self.vbuffer = []
         self.set_terminator("\r\n\r\n")
     
     def collect_incoming_data(self, data):
@@ -35,10 +37,8 @@ class MultiUserServer(asyncore.dispatcher):
         self.set_reuse_addr()
         self.bind((self.host, self.port))
         self.listen(5)
-        print "initialized"
 
     def broadcast(self, data):
-        print "broadcasting"
         global sessions
         if not sessions: return
         for i in sessions:
@@ -50,22 +50,18 @@ class MultiUserServer(asyncore.dispatcher):
             pass
         else:
             sock, addr = pair
-            print 'Incoming connection from %s' % repr(addr)
             session = MultiUserSession(sock, self)
             global sessions
             sessions.append(session)
 
-class MultiUserClient(asyncore.dispatcher_with_send):
+class MultiUserClientReader(asyncore.dispatcher_with_send):
     def __init__(self, host, port):
         asyncore.dispatcher.__init__(self)
         self.host = host
         self.port = port
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connect((host, port))
-
-    def send_message(self, message):
-        self.out_buffer = message
-        self.initiate_send()
+        self.out_buffer = ""
 
     def handle_close(self):
         self.close()
@@ -74,8 +70,16 @@ class MultiUserClient(asyncore.dispatcher_with_send):
         data = self.recv(8192)
         print data
 
-
-
+class MultiUserClientSender(object):
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
+        self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.connection.connect((host,port))
+    
+    def send_message(self, message):
+        print "sending"
+        self.connection.send(message)
 
 
 
