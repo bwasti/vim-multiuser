@@ -20,3 +20,4 @@ Use your plugin manager of choice.
 
 1. Write a plugin
 2. Write documentation
+3. Word
