@@ -16,7 +16,7 @@ from vim_multiuser import start_multiuser_server
 port = int(vim.eval("a:arg1"))
 if port == 0:
     port = 1337
-print "Initializing on port", port
+print "Initializing multiuser server on port", port
 
 start_multiuser_server(port)
 
@@ -28,8 +28,8 @@ python << endOfPython
 
 from vim_multiuser import start_multiuser_client
 
-host = '0.0.0.0'#vim.eval("a:arg1")
-port = 1337#vim.eval("a:arg2")
+host = vim.eval("a:arg1")
+port = int(vim.eval("a:arg2"))
 
 start_multiuser_client(host, port)
 
