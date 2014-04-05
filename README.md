@@ -16,8 +16,9 @@ Use your plugin manager of choice.
   - Add `Plug 'https://github.com/emgram769/vim-multiuser'` to .vimrc
   - Run `:PlugInstall`
 
-## Todo
+## Usage
 
-1. Write a plugin
-2. Write documentation
-3. Word
+- Set up a server
+  - `:MultiUserServer(port)`
+- Set up a client
+  - `:MultiUserServer(host, port)`
