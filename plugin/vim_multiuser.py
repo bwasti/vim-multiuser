@@ -19,7 +19,7 @@ class MultiUserMain(object):
     def main_loop(self):
         if (self.connection_type == 'server'):
             self.server = MultiUserServer(self.host, self.port)
-        else
+        else:
             self.client_reader = MultiUserClientReader(self.host, self.port)
         asyncore.loop()
 

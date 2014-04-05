@@ -6,6 +6,23 @@ import json
 
 sessions = []
 
+def parse_data(data):
+    try:
+        recv_data = json.loads(data)
+        if ('line_num' in data and 'line' in data):
+            line_num = recv_data[u'line_num']
+            line = recv_data[u'line'].encode('ascii', 'ignore')
+            vim_list = list(vim.current.buffer)
+            vim.current.buffer[:] =
+                    [vim_list[i] if i!=line_num 
+                        else line for i in xrange(len(vim_list))]
+        elif ('body' in data):
+            vim.current.buffer[:] = data[u'body']
+        vim.command(":redraw")
+    except ValueError, e:
+        pass
+
+
 class MultiUserSession(asynchat.async_chat):
     def __init__(self, sock, server):
         asynchat.async_chat.__init__(self, sock)
@@ -18,7 +35,7 @@ class MultiUserSession(asynchat.async_chat):
     def collect_incoming_data(self, data):
         self.ibuffer.append(data)
         self.server.broadcast(data)
-        self.server.parse_data(data)
+        parse_data(data)
 
     def found_terminator(self):
         self.ibuffer = []
@@ -43,18 +60,6 @@ class MultiUserServer(asyncore.dispatcher):
         for i in sessions:
             i.push(data)
 
-    def parse_data(self, data):
-        try:
-            recv_data = json.loads(data)
-            line_num = recv_data[u'line_num']
-            line = recv_data[u'line'].encode('ascii', 'ignore')
-            vim_list = list(vim.current.buffer)
-            vim.current.buffer[:] = [vim_list[i] if i!=line_num else line for i in xrange(len(vim_list))]
-        except ValueError, e:
-            pass
-            vim.current.buffer[:] = [str(e), data]
-
-
     def handle_accept(self):
         pair = self.accept()
         if pair is None:
@@ -63,6 +68,7 @@ class MultiUserServer(asyncore.dispatcher):
             sock, addr = pair
             session = MultiUserSession(sock, self)
             global sessions
+            session.push(json.dumps({'body':list(vim.current.buffer)}))
             sessions.append(session)
 
 class MultiUserClientReader(asyncore.dispatcher):
@@ -76,15 +82,9 @@ class MultiUserClientReader(asyncore.dispatcher):
     def handle_close(self):
         self.close()
 
-    def parse_data(data):
-        recv_data = json.loads(data)
-        line_num = recv_data[u'line_num']
-        line = recv_data[u'line']
-        vim.current.buffer[:] = [i if i!=line_num else line for i in list(vim.current.buffer)]
-
     def handle_read(self):
         data = self.recv(8192)
-        vim.current.buffer[:] = [data]
+        parse_data(data)
 
 class MultiUserClientSender(object):
     def __init__(self, host, port):
