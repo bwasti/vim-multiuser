@@ -3,6 +3,9 @@ import threading
 import time
 from vim_multiuser_server import *
 
+old_buffer = []
+emitter = None
+
 class MultiUserMain(object):
     def __init__(self, connection_type, host, port):
         self.curr_buf = [""]
@@ -14,6 +17,7 @@ class MultiUserMain(object):
 
     def run(self):
         self.thread.start()
+        start_multiuser_emitter(self.host, self.port)
         return
 
     def main_loop(self):
@@ -30,3 +34,18 @@ def start_multiuser_server(port):
 def start_multiuser_client(host, port):
     multiuser = MultiUserMain('client', host, port)
     multiuser.run()
+
+def start_multiuser_emitter(host, port):
+    global emitter
+    emitter = MultiUserClientSender(host, port)
+
+def multiuser_client_send():
+    global old_buffer
+    if emitter == None: return
+    current_buffer = list(vim.current.buffer)
+    for i in xrange(min(len(current_buffer), len(old_buffer))):
+        if current_buffer[i] != old_buffer[i] and (emitter != None): 
+            #print "Before"
+            emitter.send_message({'line':current_buffer[i], 'line_num':i})
+            #print "After"
+    old_buffer = current_buffer

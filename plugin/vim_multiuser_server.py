@@ -17,7 +17,9 @@ def parse_data(data):
                     [vim_list[i] if i!=line_num 
                         else line for i in xrange(len(vim_list))])
         elif ('body' in data):
-            vim.current.buffer[:] = [data[u'body']]
+            vim_list = recv_data[u'body']
+            vim.current.buffer[:] = (
+                    [vim_list[i].encode('ascii', 'ignore') for i in xrange(len(vim_list))])
         vim.command(":redraw")
     except ValueError, e:
         vim.current.buffer[:] = [str(e), data]
@@ -95,7 +97,7 @@ class MultiUserClientSender(object):
     
     def send_message(self, message):
         print "sending"
-        self.connection.send(message)
+        self.connection.send(json.dumps(message))
 
 
 
