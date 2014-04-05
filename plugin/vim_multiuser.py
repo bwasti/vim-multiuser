@@ -48,10 +48,7 @@ def multiuser_client_send():
     current_buffer = list(vim.current.buffer)
     for i in xrange(min(len(current_buffer), len(old_buffer))):
         if current_buffer[i] != old_buffer[i] and (emitter != None): 
-            if connection_type == 'server':
-                emitter.send_message({'line':current_buffer[i], 'line_num':i})
-            else:
-                emitter.broadcast({'line':current_buffer[i], 'line_num':i})
+            emitter.send_message({'line':current_buffer[i], 'line_num':i})
             #print "After"
     old_buffer = current_buffer
 
