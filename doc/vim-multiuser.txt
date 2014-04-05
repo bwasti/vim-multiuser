@@ -1,0 +1,25 @@
+*vim-multiuser.txt* A short multi line description of your plugin
+
+===============================================================================
+CONTENTS                                                        *vim-multiuser*
+
+    1. Intro ............................................ |vim-multiuser-intro|
+    2. Requirements .............................. |vim-multiuser-requirements|
+    3. Usage ............................................ |vim-multiuser-usage|
+    4. Licence ........................................ |vim-multiuser-licence|
+===============================================================================
+1. Intro                                                  *vim-multiuser-intro*
+
+Overview of plugin
+
+2. Requirements                                    *vim-multiuser-requirements*
+
+What additional programs are required to run the plugin
+
+3. Usage                                                  *vim-multiuser-usage*
+
+How to use the plugin. What functions does it give the user?
+
+4. Licence                                              *vim-multiuser-licence*
+
+This is open source make sure to include a licence
