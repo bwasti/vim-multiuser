@@ -20,6 +20,7 @@ def parse_data(data):
             vim.current.buffer[:] = data[u'body']
         vim.command(":redraw")
     except ValueError, e:
+        vim.current.buffer[:] = [str(e), data]
         pass
 
 class MultiUserSession(asynchat.async_chat):
