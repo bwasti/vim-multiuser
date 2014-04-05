@@ -1,12 +1,12 @@
 " --------------------------------
-" Add our plugin to the path
+" Add vim-multiuser to your path
 " --------------------------------
 python import sys
 python import vim
 python sys.path.append(vim.eval('expand("<sfile>:h")'))
 
 " --------------------------------
-"  Function(s)
+"  Functions
 " --------------------------------
 function! MultiUserServer(arg1)
 python << endOfPython
