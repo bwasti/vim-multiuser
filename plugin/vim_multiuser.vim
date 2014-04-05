@@ -8,13 +8,12 @@ python sys.path.append(vim.eval('expand("<sfile>:h")'))
 " --------------------------------
 "  Function(s)
 " --------------------------------
-function! TemplateExample()
+function! MultiUser()
 python << endOfPython
 
-from vim_multiuser import vim_multiuser_example
+from vim_multiuser import start_multiuser
 
-for n in range(5):
-    print(vim_multiuser_example())
+start_multiuser()
 
 endOfPython
 endfunction
@@ -22,4 +21,4 @@ endfunction
 " --------------------------------
 "  Expose our commands to the user
 " --------------------------------
-command! Example call TemplateExample()
+command! Multiuser call MultiUser()
