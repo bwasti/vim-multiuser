@@ -1,8 +1,9 @@
 import vim
 import threading
 import time
+from vim_multiuser_server import *
 
-class MultiUserClass(object):
+class MultiUserMain(object):
     def __init__(self):
         self.curr_buf = [""]
         self.thread = threading.Thread(target=self.main_loop, args = ())
@@ -19,5 +20,5 @@ class MultiUserClass(object):
             vim.current.buffer[:] = self.curr_buf
 
 def start_multiuser():
-    multiuser = MultiUserClass()
+    multiuser = MultiUserMain()
     multiuser.run() 
