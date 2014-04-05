@@ -13,15 +13,14 @@ def parse_data(data):
             line_num = recv_data[u'line_num']
             line = recv_data[u'line'].encode('ascii', 'ignore')
             vim_list = list(vim.current.buffer)
-            vim.current.buffer[:] =
+            vim.current.buffer[:] = (
                     [vim_list[i] if i!=line_num 
-                        else line for i in xrange(len(vim_list))]
+                        else line for i in xrange(len(vim_list))])
         elif ('body' in data):
             vim.current.buffer[:] = data[u'body']
         vim.command(":redraw")
     except ValueError, e:
         pass
-
 
 class MultiUserSession(asynchat.async_chat):
     def __init__(self, sock, server):
