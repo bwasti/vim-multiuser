@@ -17,7 +17,7 @@ def parse_data(data):
                     [vim_list[i] if i!=line_num 
                         else line for i in xrange(len(vim_list))])
         elif ('body' in data):
-            vim.current.buffer[:] = data[u'body']
+            vim.current.buffer[:] = [data[u'body']]
         vim.command(":redraw")
     except ValueError, e:
         vim.current.buffer[:] = [str(e), data]
