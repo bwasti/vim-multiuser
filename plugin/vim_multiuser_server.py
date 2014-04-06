@@ -124,16 +124,19 @@ class MultiUserClientSender(object):
             self.connection.connect((host,port))
     
     def send_message(self, message):
-        global just_sent
-        global cursor
-        cursor = vim.current.window.cursor
-        if (self.connection_type == 'client'):
-            self.connection.send(json.dumps(message))
-            just_sent.insert(-1,message['timestamp'])
-            if len(just_sent) > 201:
-                just_sent = just_sent[:-200] #this is for latency :(
-        else:
-            self.broadcast(message)
+        try:
+            global just_sent
+            global cursor
+            cursor = vim.current.window.cursor
+            if (self.connection_type == 'client'):
+                self.connection.send(json.dumps(message))
+                just_sent.insert(-1,message['timestamp'])
+                if len(just_sent) > 201:
+                    just_sent = just_sent[:-200] #this is for latency :(
+            else:
+                self.broadcast(message)
+        except Exception as e:
+            print str(e)
 
     def broadcast(self, message):
         global sessions
