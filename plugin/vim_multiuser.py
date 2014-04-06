@@ -91,7 +91,7 @@ def multiuser_client_send():
     elif not(equal_length):
         # we are inserting
         if (inserting):
-            to_send['body'] = current_buffer[row-2]
+            to_send['line'] = current_buffer[row-2]
             to_send['insert'] = row-2
         # we are deleting
         elif (deleting):
