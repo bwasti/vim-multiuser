@@ -56,7 +56,13 @@ def multiuser_client_send():
                 emitter.send_message({'delete':i})
             else:
                 emitter.send_message({'line':current_buffer[i], 'line_num':i})
-            
+    while (len(current_buffer) > i):
+        emitter.send_message({'line':current_buffer[i], 'insert':i}) 
+        i+=1
+    while (len(old_buffer) > i):
+        emitter.send_message({'delete':i})
+        i+=1
+
     old_buffer = current_buffer
 
 
