@@ -52,7 +52,12 @@ class MultiUserAudioSend(object):
         self.p = pyaudio.PyAudio()
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((host, port))
-        self.run()
+        self.stream = self.p.open(format=self.p.get_format_from_width(WIDTH),
+                                channels = CHANNELS,
+                                rate = RATE,
+                                output = True,
+                                frames_per_buffer = CHUNK)
+         self.run()
     def run(self):
         while True:
             data = self.stream.read(CHUNK)
