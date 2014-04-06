@@ -32,7 +32,8 @@ def parse_data(data):
         elif ('delete' in data):
             line_num = recv_data[u'delete']
             vim_list = list(vim.current.buffer)
-            vim_list.pop(line_num)
+            if (line_num < len(vim_list)):
+                vim_list.pop(line_num)
             vim.current.buffer[:] = vim_list
         global cursor
         vim.current.window.cursor = vim.current.window.cursor
