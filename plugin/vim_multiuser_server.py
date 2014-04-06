@@ -5,6 +5,7 @@ import vim
 import json
 
 sessions = []
+cursor = (1,0)
 
 def parse_data(data):
     try:
@@ -20,6 +21,8 @@ def parse_data(data):
             vim_list = recv_data[u'body']
             vim.current.buffer[:] = (
                     [vim_list[i].encode('ascii', 'ignore') for i in xrange(len(vim_list))])
+        global cursor
+        vim.current.window.cursor = vim.current.window.cursor
         vim.command(":redraw")
     except ValueError, e:
         #vim.current.buffer[:] = [str(e), data]
@@ -102,6 +105,8 @@ class MultiUserClientSender(object):
             self.connection.connect((host,port))
     
     def send_message(self, message):
+        global cursor
+        cursor = vim.current.window.cursor
         if (self.connection_type == 'client'):
             self.connection.send(json.dumps(message))
         else:
