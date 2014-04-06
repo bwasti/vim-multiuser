@@ -103,6 +103,7 @@ class MultiUserClientSender(object):
     
     def send_message(self, message):
         if (self.connection_type == 'client'):
+            pass
             #self.connection.send(json.dumps(message))
         else:
             self.broadcast(message)
