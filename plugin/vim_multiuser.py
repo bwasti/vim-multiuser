@@ -49,28 +49,24 @@ def multiuser_client_send():
     buffer_length = min(len(current_buffer), len(old_buffer))
     to_send = dict()
     to_send['timestamp'] = str(time.time()) + str(random.randint(0, 10000))
-    for i in xrange(buffer_length):
-        if current_buffer[i] != old_buffer[i] and (emitter != None): 
-            """Check for entire line insertion."""
-            if ((i != len(current_buffer)-1 and current_buffer[i+1:] == old_buffer[i:])
-              and len(current_buffer) == (len(old_buffer)+1)):
-                to_send['line'] = current_buffer[i]
-                to_send['insert'] = i
-                break
-            elif (i == len(current_buffer)-1 and len(current_buffer) == len(old_buffer)+1):
-                to_send['line'] = current_buffer[i]
-                to_send['insert'] = i
-            elif ((i != len(old_buffer)-1 and current_buffer[i:] == old_buffer[i+1:])
-              and (len(current_buffer)+1) == len(old_buffer)):
-                to_send['delete'] = i
-                break
-            else:
-                to_send['line'] = current_buffer[i]
-                to_send['line_num'] = i
-                break
-    
+    equal_length = len(current_buffer) == len(old_buffer)
+    deleting = len(current_buffer) + 1 == len(old_buffer)
+    inserting = len(current_buffer) == len(old_buffer) + 1
+    row,col = vim.current.window.cursor
+    if row-1 < len(old_buffer) and current_buffer[row-1] != old_buffer[row-1] and equal_length:
+        to_send['line'] = current_buffer[row-1]
+        to_send['line_num'] = row-1
+    elif not(equal_length):
+        # we are deleting
+        if (inserting):
+            to_send['line'] = current_buffer[row-1]
+            to_send['insert'] = row-1
+        # we are deleting
+        elif (deleting):
+            to_send['delete'] = row-1
     old_buffer = current_buffer
-    emitter.send_message(to_send)
+    if ('line' in to_send or 'delete' in to_send):
+        emitter.send_message(to_send)
 
 
 

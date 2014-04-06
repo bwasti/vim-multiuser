@@ -129,8 +129,9 @@ class MultiUserClientSender(object):
         cursor = vim.current.window.cursor
         if (self.connection_type == 'client'):
             self.connection.send(json.dumps(message))
-            just_sent += [message['timestamp']]
-            just_sent = just_sent[:-10] #this is for latency :(
+            just_sent.insert(-1,message['timestamp'])
+            if len(just_sent) > 201:
+                just_sent = just_sent[:-200] #this is for latency :(
         else:
             self.broadcast(message)
 
