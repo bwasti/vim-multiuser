@@ -35,8 +35,8 @@ def parse_data(data):
             vim_list.insert(line_num, line)
             vim.current.buffer[:] = vim_list
             row, col = vim.current.window.cursor
-            #if (line_num <= row and row+1 <= len(vim.current.buffer)):
-            #    vim.current.window.cursor = (row+1,col)
+            if (line_num <= row and row+1 <= len(vim.current.buffer)):
+                vim.current.window.cursor = (row+1,col)
         elif ('delete' in recv_data):
             line_num = recv_data[u'delete']
             vim_list = list(vim.current.buffer)
