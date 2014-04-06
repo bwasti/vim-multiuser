@@ -110,7 +110,11 @@ class MultiUserClientReader(asyncore.dispatcher):
         self.host = host
         self.port = port
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.connect((host, port))
+        try:
+            self.connect((host, port))
+        except Exception as e:
+            print str(e)
+            return
 
     def handle_close(self):
         self.close()
