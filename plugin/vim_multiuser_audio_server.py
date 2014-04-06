@@ -1,5 +1,4 @@
 import socket
-import vim
 
 CHUNK = 1024
 FORMAT = ""
@@ -19,19 +18,20 @@ def module_exists(module_name):
 class MultiUserAudioRecv(object):
     def __init__(self, host, port):
         if (module_exists("pyaudio")):
+            import pyaudio
             FORMAT = pyaudio.paInt16
         else:
             self.failure = True
             return
         self.p = pyaudio.PyAudio()
-        self.stream = self.p.open(format=p.get_format_from_width(WIDTH),
+        self.stream = self.p.open(format=self.p.get_format_from_width(WIDTH),
                                 channels = CHANNELS,
                                 rate = RATE,
                                 output = True,
                                 frames_per_buffer = CHUNK)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.bind((host, port))
-        selfsocket.listen(1)
+        self.socket.listen(1)
         self.run()
         
     def run(self):
@@ -44,6 +44,7 @@ class MultiUserAudioRecv(object):
 class MultiUserAudioSend(object):
     def __init__(self, host, port):
         if (module_exists("pyaudio")):
+            import pyaudio
             FORMAT = pyaudio.paInt16
         else:
             self.failure = True
