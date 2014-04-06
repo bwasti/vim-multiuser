@@ -11,29 +11,29 @@ just_sent = ""
 def parse_data(data):
     try:
         recv_data = json.loads(data)
-        if ('timestamp' in data):
-            if (data['timestamp'] == just_sent):
+        if ('timestamp' in recv_data):
+            if (recv_data['timestamp'] == just_sent):
                 return
         else:
             return
-        if ('line_num' in data and 'line' in data):
+        if ('line_num' in recv_data and 'line' in recv_data):
             line_num = recv_data[u'line_num']
             line = recv_data[u'line'].encode('ascii', 'ignore')
             vim_list = list(vim.current.buffer)
             vim.current.buffer[:] = (
                     [elem if i!=line_num 
                         else line for i,elem in enumerate(vim_list)])
-        elif ('body' in data):
+        elif ('body' in recv_data):
             vim_list = recv_data[u'body']
             vim.current.buffer[:] = (
                     [vim_list[i].encode('ascii', 'ignore') for i in xrange(len(vim_list))])
-        elif ('insert' in data):
+        elif ('insert' in recv_data):
             line_num = recv_data[u'insert']
             line = recv_data[u'line'].encode('ascii', 'ignore')
             vim_list = list(vim.current.buffer)
             vim_list.insert(line_num, line)
             vim.current.buffer[:] = vim_list 
-        elif ('delete' in data):
+        elif ('delete' in recv_data):
             line_num = recv_data[u'delete']
             vim_list = list(vim.current.buffer)
             if (line_num < len(vim_list)):
@@ -95,7 +95,7 @@ class MultiUserServer(asyncore.dispatcher):
             self.session_id += 1
             session = MultiUserSession(sock, self, self.session_id)
             global sessions
-            session.push(json.dumps({'body':list(vim.current.buffer)}))
+            session.push(json.dumps({'body':list(vim.current.buffer),'timestamp':'yeezus'}))
             sessions.append(session)
 
 class MultiUserClientReader(asyncore.dispatcher):
