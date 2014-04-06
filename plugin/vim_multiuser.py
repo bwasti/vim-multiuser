@@ -91,12 +91,12 @@ def multiuser_client_send():
     elif not(equal_length):
         # we are inserting
         if (inserting):
-            to_send['line'] = current_buffer[row-2]
-            to_send['insert'] = row-2
-            emitter.send_message({
-                'line':current_buffer[row-1],
-                'line_num':row-1
-            })
+            to_send['line'] = ''
+            to_send['insert'] = row-1
+            #emitter.send_message({
+            #    'line':'',
+            #    'line_num':row-1
+            #})
         # we are deleting
         elif (deleting):
             to_send['delete'] = row-1
