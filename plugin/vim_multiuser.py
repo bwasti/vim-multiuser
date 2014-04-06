@@ -53,12 +53,12 @@ def multiuser_client_send():
         if current_buffer[i] != old_buffer[i] and (emitter != None): 
             """Check for entire line insertion."""
             if ((i != len(current_buffer)-1 and current_buffer[i+1:] == old_buffer[i:])
-              and len(current_buffer) == len(old_buffer)+1):
+              and len(current_buffer) == (len(old_buffer)+1)):
                 to_send['line'] = current_buffer[i]
                 to_send['insert'] = i
                 break
             elif ((i != len(old_buffer)-1 and current_buffer[i:] == old_buffer[i+1:])
-              and len(current_buffer)+1 == len(old_buffer)):
+              and (len(current_buffer)+1) == len(old_buffer)):
                 to_send['delete'] = i
                 break
             else:
@@ -66,8 +66,8 @@ def multiuser_client_send():
                 to_send['line_num'] = i
                 break
     
-    emitter.send_message(to_send)
     old_buffer = current_buffer
+    emitter.send_message(to_send)
 
 
 

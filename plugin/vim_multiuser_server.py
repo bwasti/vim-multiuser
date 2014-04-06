@@ -11,7 +11,11 @@ just_sent = ""
 def parse_data(data):
     try:
         recv_data = json.loads(data)
-        
+        if ('timestamp' in data):
+            if (data['timestamp'] == just_sent):
+                return
+        else:
+            return
         if ('line_num' in data and 'line' in data):
             line_num = recv_data[u'line_num']
             line = recv_data[u'line'].encode('ascii', 'ignore')
@@ -107,8 +111,7 @@ class MultiUserClientReader(asyncore.dispatcher):
 
     def handle_read(self):
         data = self.recv(8192)
-        if (just_sent != data):
-            parse_data(data)
+        parse_data(data)
 
 class MultiUserClientSender(object):
     def __init__(self, host, port, connection_type):
@@ -124,7 +127,7 @@ class MultiUserClientSender(object):
         cursor = vim.current.window.cursor
         if (self.connection_type == 'client'):
             self.connection.send(json.dumps(message))
-            just_sent = json.dumps(message)
+            just_sent = message['timestamp']
         else:
             self.broadcast(message)
 
