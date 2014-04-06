@@ -13,8 +13,8 @@ CHANNELS = 1
 RATE = 44100
 RECORD_SECONDS = 40
 
-HOST = '192.168.42.215'    # The remote host
-PORT = 1338              # The same port as used by the server
+HOST = '0.0.0.0'    # The remote host
+PORT = 3333              # The same port as used by the server
 
 def Pitch(signal):
     signal = np.fromstring(signal, 'Int16');
