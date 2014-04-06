@@ -35,7 +35,8 @@ def parse_data(data):
             vim_list.insert(line_num, line)
             vim.current.buffer[:] = vim_list
             row, col = vim.current.window.cursor
-            vim.current.window.cursor = (row+1,col)
+            if (line_num <= row and row+1 <= len(vim.current.buffer)):
+                vim.current.window.cursor = (row+1,col)
         elif ('delete' in recv_data):
             line_num = recv_data[u'delete']
             vim_list = list(vim.current.buffer)
@@ -43,7 +44,8 @@ def parse_data(data):
                 vim_list.pop(line_num)
             vim.current.buffer[:] = vim_list
             row, col = vim.current.window.cursor
-            vim.current.window.cursor = (row-1,col)
+            if (line_num <= row and row-1 > 0):
+                vim.current.window.cursor = (row-1,col)
         #vim.current.window.cursor = cursor
         vim.command(":redraw")
     except ValueError, e:
