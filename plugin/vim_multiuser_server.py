@@ -6,14 +6,14 @@ import json
 
 sessions = []
 cursor = (1,0)
-just_sent = ""
+just_sent = []
 
 def parse_data(data):
     try:
         recv_data = json.loads(data)
         if ('timestamp' in recv_data):
             global just_sent
-            if (recv_data['timestamp'] == just_sent):
+            if (recv_data['timestamp'] in just_sent):
                 return
         else:
             return
@@ -129,7 +129,8 @@ class MultiUserClientSender(object):
         cursor = vim.current.window.cursor
         if (self.connection_type == 'client'):
             self.connection.send(json.dumps(message))
-            just_sent = message['timestamp']
+            just_sent += [message['timestamp']]
+            just_sent = just_sent[:-5]
         else:
             self.broadcast(message)
 
