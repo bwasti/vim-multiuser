@@ -87,7 +87,7 @@ def multiuser_client_send():
     row,col = vim.current.window.cursor
     changed = False
     if (equal_length):
-        for i in xrange(min(len(current_buffer))):
+        for i in xrange(len(current_buffer)):
             if current_buffer[i]!=old_buffer[i]:
                 changed = True
                 break
