@@ -36,7 +36,7 @@ class MultiUserAudioRecv(object):
         
     def run(self):
         self.conn, self.addr = self.socket.accept()
-        data = self.conn.recv(1024)
+        data = self.conn.recv(4*CHUNK)
         while data != '':
             self.stream.write(data)
             data = self.conn.recv(1024)

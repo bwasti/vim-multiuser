@@ -6,14 +6,14 @@ import json
 
 sessions = []
 cursor = (1,0)
-just_sent = ""
+just_sent = []
 
 def parse_data(data):
     try:
         recv_data = json.loads(data)
         if ('timestamp' in recv_data):
             global just_sent
-            if (recv_data['timestamp'] == just_sent):
+            if (recv_data['timestamp'] in just_sent):
                 return
         else:
             return
@@ -41,7 +41,7 @@ def parse_data(data):
                 vim_list.pop(line_num)
             vim.current.buffer[:] = vim_list
         global cursor
-        vim.current.window.cursor = vim.current.window.cursor
+        #vim.current.window.cursor = cursor
         vim.command(":redraw")
     except ValueError, e:
         #vim.current.buffer[:] = [str(e), data]
@@ -129,7 +129,9 @@ class MultiUserClientSender(object):
         cursor = vim.current.window.cursor
         if (self.connection_type == 'client'):
             self.connection.send(json.dumps(message))
-            just_sent = message['timestamp']
+            just_sent.insert(-1,message['timestamp'])
+            if len(just_sent) > 201:
+                just_sent = just_sent[:-200] #this is for latency :(
         else:
             self.broadcast(message)
 
