@@ -17,7 +17,7 @@ def module_exists(module_name):
         return True
 
 class MultiUserAudioRecv(object):
-    def __init__(self, host, port, callback):
+    def __init__(self, host, port):
         if (module_exists("pyaudio")):
             import pyaudio
             FORMAT = pyaudio.paInt16
@@ -33,13 +33,11 @@ class MultiUserAudioRecv(object):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.bind((host, port))
         self.socket.listen(1)
-        self.callback = callback
         self.run()
         
     def run(self):
         self.conn, self.addr = self.socket.accept()
         data = self.conn.recv(4*CHUNK)
-        self.callback()
         while data != '':
             self.stream.write(data)
             data = self.conn.recv(1024)
