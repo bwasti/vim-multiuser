@@ -25,6 +25,7 @@ class MultiUserAudioMain(object):
     def audio_receiver_thread(self):
         if connection_type == 'client':
             self.audio_receiver = MultiUserAudioRecv(self.host, self.port+1)
+            vim.current.buffer[:] = ["Established client"]
         else:
             self.audio_receiver = MultiUserAudioRecv(self.host, self.port)
 
