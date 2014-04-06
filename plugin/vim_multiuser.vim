@@ -19,7 +19,7 @@ if port == 0:
 print "Initializing multiuser server on port", port
 
 start_multiuser_server(port)
-vim.eval("autocmd CursorMovedI * :call MultiUserCursorMoved()")
+#vim.eval("autocmd CursorMovedI * :call MultiUserCursorMoved()")
 
 endOfPython
 endfunction
@@ -33,7 +33,7 @@ host = vim.eval("a:arg1").encode('ascii', 'ignore')
 port = int(vim.eval("a:arg2"))
 
 start_multiuser_client(host, port)
-vim.eval("autocmd CursorMovedI * :call MultiUserCursorMoved()")
+#vim.eval("autocmd CursorMovedI * :call MultiUserCursorMoved()")
 
 endOfPython
 endfunction
@@ -54,3 +54,4 @@ endfunction
 " --------------------------------
 command! MuS -nargs=1 call MultiUserServer(a:0)
 command! MuC -nargs=2 call MultiUserClient(a:0, a:1)
+autocmd CursorMovedI * :call MultiUserCursorMoved()
