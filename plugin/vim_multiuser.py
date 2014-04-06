@@ -93,13 +93,9 @@ def multiuser_client_send():
         if (inserting):
             to_send['line'] = ''
             to_send['insert'] = row-1
-            #emitter.send_message({
-            #    'line':'',
-            #    'line_num':row-1
-            #})
         # we are deleting
         elif (deleting):
-            to_send['delete'] = row-1
+            to_send['delete'] = row
     old_buffer = current_buffer
     if ('line' in to_send or 'delete' in to_send):
         emitter.send_message(to_send)
