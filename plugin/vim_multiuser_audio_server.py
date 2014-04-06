@@ -8,6 +8,7 @@ CHANNELS = 1
 RATE = 44100
 RECORD_SECONDS = 40
 WIDTH = 2
+
 def module_exists(module_name):
     try:
         __import__(module_name)
@@ -18,7 +19,7 @@ def module_exists(module_name):
 
 class MultiUserAudioRecv(object):
     def __init__(self, host, port):
-        self.host = host
+        self.host = '0.0.0.0'
         if (module_exists("pyaudio")):
             import pyaudio
             FORMAT = pyaudio.paInt16
@@ -32,7 +33,7 @@ class MultiUserAudioRecv(object):
                                 output = True,
                                 frames_per_buffer = CHUNK)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.bind((host, port))
+        self.socket.bind((self.host, port))
         self.socket.listen(1)
         self.run()
         
