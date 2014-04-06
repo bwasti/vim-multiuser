@@ -26,7 +26,8 @@ def parse_data(data):
             line_num = recv_data[u'insert']
             line = recv_data[u'line'].encode('ascii', 'ignore')
             vim_list = list(vim.current.buffer)
-            vim.current.buffer[:] = vim_list.insert(line_num, line) 
+            vim_list.insert(line_num, line)
+            vim.current.buffer[:] = vim_list 
         elif ('delete' in data):
             line_num = recv_data[u'delete']
             vim_list = list(vim.current.buffer)
