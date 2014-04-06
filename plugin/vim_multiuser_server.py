@@ -16,8 +16,8 @@ def parse_data(data):
             line = recv_data[u'line'].encode('ascii', 'ignore')
             vim_list = list(vim.current.buffer)
             vim.current.buffer[:] = (
-                    [vim_list[i] if i!=line_num 
-                        else line for i in xrange(len(vim_list))])
+                    [elem if i!=line_num 
+                        else line for i,elem in enumerate(vim_list)])
         elif ('body' in data):
             vim_list = recv_data[u'body']
             vim.current.buffer[:] = (
