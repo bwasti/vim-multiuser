@@ -57,6 +57,9 @@ def multiuser_client_send():
                 to_send['line'] = current_buffer[i]
                 to_send['insert'] = i
                 break
+            elif ((i == len(current_buffer)-1 and len(current_buffer) len(old_buffer)+1:
+                to_send['line'] = current_buffer[i]
+                to_send['insert'] = i
             elif ((i != len(old_buffer)-1 and current_buffer[i:] == old_buffer[i+1:])
               and (len(current_buffer)+1) == len(old_buffer)):
                 to_send['delete'] = i
