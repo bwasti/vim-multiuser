@@ -25,7 +25,7 @@ class MultiUserAudioMain(object):
 
     def audio_receiver(self):
         if self.connection_type == 'client':
-            self.audio_receiver = MultiUserAudioRecv(self.host, self.port+1)
+            self.audio_receiver = MultiUserAudioRecv('0.0.0.0', self.port+1)
         else:
             self.audio_receiver = MultiUserAudioRecv(self.host, self.port)
 
@@ -57,8 +57,8 @@ class MultiUserMain(object):
         asyncore.loop()
 
 
-def start_multiuser_server(port):
-    multiuser = MultiUserMain('server', '0.0.0.0', port)
+def start_multiuser_server(host, port):
+    multiuser = MultiUserMain('server', host, port)
     multiuser.run() 
 
 def start_multiuser_client(host, port):
