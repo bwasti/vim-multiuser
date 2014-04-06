@@ -130,7 +130,7 @@ class MultiUserClientSender(object):
         if (self.connection_type == 'client'):
             self.connection.send(json.dumps(message))
             just_sent += [message['timestamp']]
-            just_sent = just_sent[:-5]
+            just_sent = just_sent[:-10] #this is for latency :(
         else:
             self.broadcast(message)
 
