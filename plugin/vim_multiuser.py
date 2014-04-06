@@ -48,7 +48,7 @@ def multiuser_client_send():
     current_buffer = list(vim.current.buffer)
     buffer_length = min(len(current_buffer), len(old_buffer))
     to_send = dict()
-    to_send['timestamp'] = str(time.time()) + str(random.randint(0,10000))
+    to_send['timestamp'] = str(time.time()) + str(random.randint(0, 10000))
     for i in xrange(buffer_length):
         if current_buffer[i] != old_buffer[i] and (emitter != None): 
             """Check for entire line insertion."""

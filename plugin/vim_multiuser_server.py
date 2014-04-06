@@ -41,7 +41,7 @@ def parse_data(data):
                 vim_list.pop(line_num)
             vim.current.buffer[:] = vim_list
         global cursor
-        vim.current.window.cursor = cursor
+        #vim.current.window.cursor = cursor
         vim.command(":redraw")
     except ValueError, e:
         #vim.current.buffer[:] = [str(e), data]
