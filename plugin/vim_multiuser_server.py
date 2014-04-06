@@ -44,7 +44,6 @@ def parse_data(data):
             vim.current.buffer[:] = vim_list
             row, col = vim.current.window.cursor
             vim.current.window.cursor = (row-1,col)
-         global cursor
         #vim.current.window.cursor = cursor
         vim.command(":redraw")
     except ValueError, e:
