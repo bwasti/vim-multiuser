@@ -22,7 +22,7 @@ def parse_data(data):
                     [vim_list[i].encode('ascii', 'ignore') for i in xrange(len(vim_list))])
         vim.command(":redraw")
     except ValueError, e:
-        vim.current.buffer[:] = [str(e), data]
+        #vim.current.buffer[:] = [str(e), data]
         pass
 
 class MultiUserSession(asynchat.async_chat):
@@ -97,14 +97,13 @@ class MultiUserClientSender(object):
         self.host = host
         self.port = port
         self.connection_type = connection_type
-        if (connection_type == 'client'):
-            self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.connection.connect((host,port))
+        #if (connection_type == 'client'):
+            #self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            #self.connection.connect((host,port))
     
     def send_message(self, message):
         if (self.connection_type == 'client'):
-            pass
-            #self.connection.send(json.dumps(message))
+            pass#self.connection.send(json.dumps(message))
         else:
             self.broadcast(message)
 
