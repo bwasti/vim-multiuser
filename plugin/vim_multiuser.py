@@ -25,7 +25,7 @@ class MultiUserAudioMain(object):
 
     def audio_receiver(self):
         if self.connection_type == 'client':
-            self.audio_receiver = MultiUserAudioRecv('0.0.0.0', self.port+1)
+            self.audio_receiver = MultiUserAudioRecv(self.host, self.port+1)
         else:
             self.audio_receiver = MultiUserAudioRecv(self.host, self.port)
 
@@ -57,8 +57,8 @@ class MultiUserMain(object):
         asyncore.loop()
 
 
-def start_multiuser_server(host, port):
-    multiuser = MultiUserMain('server', host, port)
+def start_multiuser_server(port):
+    multiuser = MultiUserMain('server', '0.0.0.0', port)
     multiuser.run() 
 
 def start_multiuser_client(host, port):
@@ -93,6 +93,11 @@ def multiuser_client_send():
         if (inserting):
             to_send['line'] = current_buffer[row-1]
             to_send['insert'] = row-1
+            if (row-2 >= 0):
+                emitter.send_message({
+                    'line':current_buffer[row-2],
+                    'insert':row-2
+                })
         # we are deleting
         elif (deleting):
             to_send['delete'] = row-1

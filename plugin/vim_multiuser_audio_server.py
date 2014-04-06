@@ -70,6 +70,7 @@ class MultiUserAudioSend(object):
 
     def attempt_connect(self):
         try:
+            vim.current.buffer[:] = ["host:"+self.host+" port:"+str(self.port)]
             self.socket.connect((self.host, self.port))
             self.run()
         except Exception as e:
