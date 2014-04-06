@@ -50,7 +50,6 @@ class MultiUserAudioRecv(object):
 
 class MultiUserAudioSend(object):
     def __init__(self, host, port):
-        #vim.current.buffer[:] = ["port2: "+str(port)]
         if (module_exists("pyaudio")):
             import pyaudio
             FORMAT = pyaudio.paInt16
@@ -70,7 +69,6 @@ class MultiUserAudioSend(object):
 
     def attempt_connect(self):
         try:
-            vim.current.buffer[:] = ["host:"+self.host+" port:"+str(self.port)]
             self.socket.connect((self.host, self.port))
             self.run()
         except Exception as e:
