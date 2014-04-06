@@ -19,6 +19,7 @@ def module_exists(module_name):
 
 class MultiUserAudioRecv(object):
     def __init__(self, host, port):
+        self.host = host
         host = '0.0.0.0'
         if (module_exists("pyaudio")):
             import pyaudio
