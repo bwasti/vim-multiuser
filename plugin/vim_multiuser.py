@@ -85,6 +85,17 @@ def multiuser_client_send():
     deleting = len(current_buffer) + 1 == len(old_buffer)
     inserting = len(current_buffer) == len(old_buffer) + 1
     row,col = vim.current.window.cursor
+    changed = False
+    if (equal_length):
+        for i in xrange(min(len(current_buffer))):
+            if current_buffer[i]!=old_buffer[i]:
+                changed = True
+                break
+    else:
+        changed = True
+    if not changed:
+        old_buffer = current_buffer
+        return
     if row-1 < len(old_buffer) and current_buffer[row-1] != old_buffer[row-1] and equal_length:
         to_send['line'] = current_buffer[row-1]
         to_send['line_num'] = row-1
