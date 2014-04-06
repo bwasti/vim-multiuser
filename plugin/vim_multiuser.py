@@ -46,10 +46,17 @@ def multiuser_client_send():
     global old_buffer
     if emitter == None: return
     current_buffer = list(vim.current.buffer)
-    for i in xrange(min(len(current_buffer), len(old_buffer))):
+    buffer_length = min(len(current_buffer), len(old_buffer))
+    for i in xrange(buffer_length):
         if current_buffer[i] != old_buffer[i] and (emitter != None): 
-            emitter.send_message({'line':current_buffer[i], 'line_num':i})
-            #print "After"
+            """Check for entire line insertion."""
+            if (i != buffer_length-1 and current_buffer[i+1] == old_buffer[i]):
+                emitter.send_message({'line':current_buffer[i], 'insert':i})
+            elif (i != buffer_length-1 and current_buffer[i] == old_buffer[i+1]):
+                emitter.send_message({'delete':i})
+            else:
+                emitter.send_message({'line':current_buffer[i], 'line_num':i})
+            
     old_buffer = current_buffer
 
 

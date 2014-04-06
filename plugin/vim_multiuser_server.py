@@ -10,6 +10,7 @@ cursor = (1,0)
 def parse_data(data):
     try:
         recv_data = json.loads(data)
+        
         if ('line_num' in data and 'line' in data):
             line_num = recv_data[u'line_num']
             line = recv_data[u'line'].encode('ascii', 'ignore')
@@ -21,6 +22,16 @@ def parse_data(data):
             vim_list = recv_data[u'body']
             vim.current.buffer[:] = (
                     [vim_list[i].encode('ascii', 'ignore') for i in xrange(len(vim_list))])
+        elif ('insert' in data):
+            line_num = recv_data[u'insert']
+            line = recv_data[u'line'].encode('ascii', 'ignore')
+            vim_list = list(vim.current.buffer)
+            vim.current.buffer[:] = vim_list.insert(line_num, line) 
+        elif ('delete' in data):
+            line_num = recv_data[u'delete']
+            vim_list = list(vim.current.buffer)
+            vim.current.buffer[:] = vim_list.pop(line_num)
+
         global cursor
         vim.current.window.cursor = vim.current.window.cursor
         vim.command(":redraw")
