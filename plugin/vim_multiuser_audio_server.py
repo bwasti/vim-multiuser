@@ -19,6 +19,8 @@ def module_exists(module_name):
 
 class MultiUserAudioRecv(object):
     def __init__(self, host, port):
+        vim.current.buffer[:] = ["port: "+host]
+        host = '0.0.0.0'
         if (module_exists("pyaudio")):
             import pyaudio
             FORMAT = pyaudio.paInt16
@@ -49,6 +51,7 @@ class MultiUserAudioRecv(object):
 
 class MultiUserAudioSend(object):
     def __init__(self, host, port):
+        #vim.current.buffer[:] = ["port2: "+str(port)]
         if (module_exists("pyaudio")):
             import pyaudio
             FORMAT = pyaudio.paInt16
