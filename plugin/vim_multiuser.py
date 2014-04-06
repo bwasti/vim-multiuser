@@ -1,6 +1,6 @@
 import vim
 import threading
-import time
+import time, random
 from vim_multiuser_server import *
 
 old_buffer = []
@@ -47,18 +47,24 @@ def multiuser_client_send():
     if emitter == None: return
     current_buffer = list(vim.current.buffer)
     buffer_length = min(len(current_buffer), len(old_buffer))
+    to_send = dict()
+    to_send['timestamp'] = str(time.time()) + str(random.randint(0,10000))
     for i in xrange(buffer_length):
         if current_buffer[i] != old_buffer[i] and (emitter != None): 
             """Check for entire line insertion."""
             if (i != len(current_buffer)-1 and current_buffer[i+1:] == old_buffer[i:]):
-                emitter.send_message({'line':current_buffer[i], 'insert':i})
+                to_send['line'] = current_buffer[i]
+                to_send['insert'] = i
                 break
             elif (i != len(old_buffer)-1 and current_buffer[i:] == old_buffer[i+1:]):
-                emitter.send_message({'delete':i})
+                to_send['delete'] = i
                 break
             else:
-                emitter.send_message({'line':current_buffer[i], 'line_num':i})
+                to_send['line'] = current_buffer[i]
+                to_send['line_num'] = i
                 break
+    
+    emitter.send_message(to_send)
     old_buffer = current_buffer
 
 

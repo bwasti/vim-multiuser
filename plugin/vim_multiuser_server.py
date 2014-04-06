@@ -6,6 +6,7 @@ import json
 
 sessions = []
 cursor = (1,0)
+just_sent = ""
 
 def parse_data(data):
     try:
@@ -33,7 +34,6 @@ def parse_data(data):
             vim_list = list(vim.current.buffer)
             vim_list.pop(line_num)
             vim.current.buffer[:] = vim_list
-
         global cursor
         vim.current.window.cursor = vim.current.window.cursor
         vim.command(":redraw")
@@ -106,7 +106,8 @@ class MultiUserClientReader(asyncore.dispatcher):
 
     def handle_read(self):
         data = self.recv(8192)
-        parse_data(data)
+        if (just_sent != data):
+            parse_data(data)
 
 class MultiUserClientSender(object):
     def __init__(self, host, port, connection_type):
@@ -122,6 +123,7 @@ class MultiUserClientSender(object):
         cursor = vim.current.window.cursor
         if (self.connection_type == 'client'):
             self.connection.send(json.dumps(message))
+            just_sent = json.dumps(message)
         else:
             self.broadcast(message)
 
