@@ -12,6 +12,7 @@ def parse_data(data):
     try:
         recv_data = json.loads(data)
         if ('timestamp' in recv_data):
+            global just_sent
             if (recv_data['timestamp'] == just_sent):
                 return
         else:
@@ -123,6 +124,7 @@ class MultiUserClientSender(object):
             self.connection.connect((host,port))
     
     def send_message(self, message):
+        global just_sent
         global cursor
         cursor = vim.current.window.cursor
         if (self.connection_type == 'client'):
