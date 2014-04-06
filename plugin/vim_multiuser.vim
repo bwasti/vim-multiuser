@@ -48,7 +48,6 @@ multiuser_client_send()
 endOfPython
 endfunction
 
-
 " --------------------------------
 "  Expose our commands to the user
 " --------------------------------
