@@ -38,6 +38,36 @@ start_multiuser_client(host, port)
 endOfPython
 endfunction
 
+function! MultiUserAudioServer(arg1)
+python << endOfPython
+
+from vim_multiuser import start_multiuser_audio
+
+port = int(vim.eval("a:arg1"))
+if port == 0:
+    port = 1337
+print "Initializing multiuser server on port", port
+
+start_multiuser_audio('0.0.0.0', port, 'server')
+#vim.eval("autocmd CursorMovedI * :call MultiUserCursorMoved()")
+
+endOfPython
+endfunction
+
+function! MultiUserAudioClient(arg1, arg2)
+python << endOfPython
+
+from vim_multiuser import start_multiuser_audio
+
+host = vim.eval("a:arg1").encode('ascii', 'ignore')
+port = int(vim.eval("a:arg2"))
+
+start_multiuser_audio(host, port, 'client')
+#vim.eval("autocmd CursorMovedI * :call MultiUserCursorMoved()")
+
+endOfPython
+endfunction
+
 function! MultiUserCursorMoved()
 python << endOfPython
 

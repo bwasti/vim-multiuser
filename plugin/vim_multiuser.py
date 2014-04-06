@@ -44,7 +44,6 @@ class MultiUserMain(object):
         self.thread = threading.Thread(target=self.main_loop, args = ())
         self.thread.daemon = True
         self.connection_type = connection_type
-        self.audio = MultiUserAudioMain(connection_type, host, port)
     def run(self):
         self.thread.start()
         start_multiuser_emitter(self.host, self.port, self.connection_type)
@@ -71,6 +70,9 @@ def start_multiuser_emitter(host, port, conn_type):
     global connection_type
     connection_type = conn_type
     emitter = MultiUserClientSender(host, port, conn_type)
+
+def start_multiuser_audio(host, port, connection_type):
+    audio = MultiUserAudioMain(connection_type, host, port)
 
 def multiuser_client_send():
     global old_buffer
