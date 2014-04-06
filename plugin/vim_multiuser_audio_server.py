@@ -1,4 +1,5 @@
 import socket
+import time
 
 CHUNK = 1024
 FORMAT = ""
@@ -16,7 +17,7 @@ def module_exists(module_name):
         return True
 
 class MultiUserAudioRecv(object):
-    def __init__(self, host, port):
+    def __init__(self, host, port, callback):
         if (module_exists("pyaudio")):
             import pyaudio
             FORMAT = pyaudio.paInt16
@@ -32,11 +33,13 @@ class MultiUserAudioRecv(object):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.bind((host, port))
         self.socket.listen(1)
+        self.callback = callback
         self.run()
         
     def run(self):
         self.conn, self.addr = self.socket.accept()
         data = self.conn.recv(4*CHUNK)
+        self.callback()
         while data != '':
             self.stream.write(data)
             data = self.conn.recv(1024)
@@ -54,15 +57,22 @@ class MultiUserAudioSend(object):
             self.failure = True
             return
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect((host, port))
-
         self.p = pyaudio.PyAudio()
         self.stream = self.p.open(format=self.p.get_format_from_width(WIDTH),
                                 channels = CHANNELS,
                                 rate = RATE,
                                 input = True,
                                 frames_per_buffer = CHUNK)
-        self.run()
+        self.attempt_connect()
+
+    def attempt_connect(self):
+        try:
+            self.socket.connect((host, port))
+            self.run()
+        except Exception as e:
+            time.sleep(1)
+            self.attempt_connect()
+
     def run(self):
         while self.stream.is_active():
             data = self.stream.read(CHUNK)

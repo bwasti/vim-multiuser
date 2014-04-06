@@ -13,6 +13,7 @@ class MultiUserAudioMain(object):
         self.connection_type = type
         self.host = host
         self.port = port
+        self.spawn_audio_threads()
     def spawn_audio_threads(self):
         self.audio_receiver_thread = threading.Thread(target=self.audio_receiver_thread, args = ())
         self.audio_sender_thread = threading.Thread(target=self.audio_sender_thread, args = ())
@@ -20,14 +21,14 @@ class MultiUserAudioMain(object):
         self.audio_receiver_thread.daemon = True
         self.audio_sender_thread.daemon = True
         self.audio_receiver_thread.start()
-        self.audio_sender_thread.start()
 
     def audio_receiver_thread(self):
+        callback = self.audio_sender_thread.start()
         if connection_type == 'client':
-            self.audio_receiver = MultiUserAudioRecv(self.host, self.port+1)
+            self.audio_receiver = MultiUserAudioRecv(self.host, self.port+1, callback)
             vim.current.buffer[:] = ["Established client"]
         else:
-            self.audio_receiver = MultiUserAudioRecv(self.host, self.port)
+            self.audio_receiver = MultiUserAudioRecv(self.host, self.port, callback)
 
     def audio_sender_thread(self):
         if connection_type == 'client':
