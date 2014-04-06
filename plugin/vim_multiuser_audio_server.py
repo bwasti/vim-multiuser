@@ -8,7 +8,7 @@ CHANNELS = 1
 RATE = 44100
 RECORD_SECONDS = 40
 WIDTH = 2
-
+addr = "8.8.8.8"
 def module_exists(module_name):
     try:
         __import__(module_name)
@@ -19,7 +19,6 @@ def module_exists(module_name):
 
 class MultiUserAudioRecv(object):
     def __init__(self, host, port):
-        vim.current.buffer[:] = ["port: "+host]
         host = '0.0.0.0'
         if (module_exists("pyaudio")):
             import pyaudio
@@ -40,6 +39,9 @@ class MultiUserAudioRecv(object):
         
     def run(self):
         self.conn, self.addr = self.socket.accept()
+        global addr
+        if (self.host == '0.0.0.0'):
+            addr = self.addr
         data = self.conn.recv(4*CHUNK)
         while data != '':
             self.stream.write(data)
@@ -52,6 +54,8 @@ class MultiUserAudioRecv(object):
 class MultiUserAudioSend(object):
     def __init__(self, host, port):
         #vim.current.buffer[:] = ["port2: "+str(port)]
+        if (host != '0.0.0.0'):
+            addr = host
         if (module_exists("pyaudio")):
             import pyaudio
             FORMAT = pyaudio.paInt16
@@ -69,7 +73,8 @@ class MultiUserAudioSend(object):
 
     def attempt_connect(self):
         try:
-            self.socket.connect((host, port))
+            vim.current.buffer[:] = ["port: "+host]
+            self.socket.connect((addr, port))
             self.run()
         except Exception as e:
             time.sleep(1)
