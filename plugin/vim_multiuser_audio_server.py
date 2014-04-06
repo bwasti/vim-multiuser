@@ -57,7 +57,7 @@ class MultiUserAudioSend(object):
                                 rate = RATE,
                                 output = True,
                                 frames_per_buffer = CHUNK)
-         self.run()
+        self.run()
     def run(self):
         while True:
             data = self.stream.read(CHUNK)
