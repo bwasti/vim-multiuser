@@ -1,5 +1,6 @@
 import socket
 import time
+import vim
 
 CHUNK = 1024
 FORMAT = ""
