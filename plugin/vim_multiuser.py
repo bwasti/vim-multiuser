@@ -2,11 +2,39 @@ import vim
 import threading
 import time, random
 from vim_multiuser_server import *
-
+from vim_multiuser_audio_server import *
+  
 old_buffer = []
 emitter = None
 connection_type = ""
 
+class MultiUserAudioMain(object):
+    def __init__(self, connection_type, host, port):
+        self.connection_type = type
+        self.host = host
+        self.port = port
+    def spawn_audio_threads(self):
+        self.audio_receiver_thread = threading.Thread(target=self.audio_receiver_thread, args = ())
+        self.audio_sender_thread = threading.Thread(target=self.audio_sender_thread, args = ())
+
+        self.audio_receiver_thread.daemon = True
+        self.audio_sender_thread.daemon = True
+        self.audio_receiver_thread.start()
+        self.audio_sender_thread.start()
+
+    def audio_receiver_thread(self):
+        if connection_type == 'client':
+            self.audio_receiver = MultiUserAudioRecv(self.host, self.port+1)
+        else:
+            self.audio_receiver = MultiUserAudioRecv(self.host, self.port)
+
+    def audio_sender_thread(self):
+        if connection_type == 'client':
+            self.audio_sender = MultiUserAudioSend(self.host, self.port)
+        else:
+            self.audio_sender = MultiUserAudioSend(self.host, self.port+1)
+    
+    
 class MultiUserMain(object):
     def __init__(self, connection_type, host, port):
         self.curr_buf = [""]
@@ -15,7 +43,7 @@ class MultiUserMain(object):
         self.thread = threading.Thread(target=self.main_loop, args = ())
         self.thread.daemon = True
         self.connection_type = connection_type
-
+        self.audio = MultiUserAudioMain(connection_type, host, port)
     def run(self):
         self.thread.start()
         start_multiuser_emitter(self.host, self.port, self.connection_type)
@@ -27,6 +55,7 @@ class MultiUserMain(object):
         else:
             self.client_reader = MultiUserClientReader(self.host, self.port)
         asyncore.loop()
+
 
 def start_multiuser_server(port):
     multiuser = MultiUserMain('server', '0.0.0.0', port)
@@ -67,8 +96,4 @@ def multiuser_client_send():
     old_buffer = current_buffer
     if ('line' in to_send or 'delete' in to_send):
         emitter.send_message(to_send)
-
-
-
-
 
