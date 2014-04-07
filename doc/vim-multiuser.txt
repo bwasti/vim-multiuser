@@ -19,11 +19,11 @@ You must have Python 2.5+ installed.  That's it!
 
 To set up a server on a specific port:
 
-`call MultiUserServer(port)`
+    call MultiUserServer(port)
 
 To connect to a server at hostname host and a specific port
 
-`call MultiUserClient(host, port)`
+    call MultiUserClient(host, port)
 
 4. Licence                                              *vim-multiuser-licence*
 
