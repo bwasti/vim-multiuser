@@ -8,8 +8,14 @@ python sys.path.append(vim.eval('expand("<sfile>:h")'))
 " --------------------------------
 "  Functions
 " --------------------------------
-function! MultiUserServer(arg1)
+
+function! SetupMovementDetection()
 autocmd CursorMovedI * :call MultiUserCursorMoved()
+autocmd CursorMoved * :call MultiUserCursorMoved()
+endfunction
+
+function! MultiUserServer(arg1)
+:call SetupMovementDetection()
 python << EOF
 
 from vim_multiuser import start_multiuser_server
@@ -23,7 +29,7 @@ EOF
 endfunction
 
 function! MultiUserClient(arg1, arg2)
-autocmd CursorMovedI * :call MultiUserCursorMoved()
+:call SetupMovementDetection()
 python << EOF
 
 from vim_multiuser import start_multiuser_client

@@ -8,6 +8,7 @@ Globals
 """
 MUConnection = None
 old_buffer = []
+old_tick = 0
 
 """
 Set up functions (called directly from vim_multiuser.vim)
@@ -42,6 +43,14 @@ TODO:
 def multiuser_client_send():
     global old_buffer
     global MUConnection
+    global old_tick
+    
+    # Check if there are changes
+    new_tick = int(vim.eval("b:changedtick"))
+    if old_tick != new_tick:
+        old_tick = new_tick
+    else:
+        return
     
     # Get the current buffer
     current_buffer = list(vim.current.buffer)
@@ -56,21 +65,6 @@ def multiuser_client_send():
     
     # Get the cursor position
     row,col = vim.current.window.cursor
-    
-    # Scan for changes if length is equal
-    changed = False
-    if (equal_length):
-        for i in xrange(len(current_buffer)):
-            if current_buffer[i]!=old_buffer[i]:
-                changed = True
-                break
-    else:
-        changed = True
-        
-    # No changes? We can return
-    if not changed:
-        old_buffer = current_buffer
-        return
 
     # Changes, but no insert or delete
     if (equal_length
