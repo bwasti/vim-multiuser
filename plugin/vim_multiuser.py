@@ -55,9 +55,6 @@ def multiuser_client_send():
     # Get the current buffer
     current_buffer = list(vim.current.buffer)
     
-    # Set up variable for emitting
-    to_send = dict()
-    
     # Bools for quick checks
     equal_length = len(current_buffer) == len(old_buffer)
     deleting = len(current_buffer) + 1 == len(old_buffer)
