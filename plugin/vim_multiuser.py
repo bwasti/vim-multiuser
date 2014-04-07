@@ -1,6 +1,5 @@
 import vim
 import threading
-import time, random
 from vim_multiuser_server import *
 
 """
