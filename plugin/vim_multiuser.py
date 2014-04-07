@@ -2,91 +2,62 @@ import vim
 import threading
 import time, random
 from vim_multiuser_server import *
-from vim_multiuser_audio_server import *
-  
+
+"""
+Globals
+"""
+MUConnection = None
 old_buffer = []
-emitter = None
-connection_type = ""
 
-class MultiUserAudioMain(object):
-    def __init__(self, connection_type, host, port):
-        self.connection_type = connection_type
-        self.host = host
-        self.port = port
-        self.spawn_audio_threads()
-    def spawn_audio_threads(self):
-        self.audio_receiver_thread = threading.Thread(target=self.audio_receiver, args = ())
-        self.audio_sender_thread = threading.Thread(target=self.audio_sender, args = ())
-
-        self.audio_receiver_thread.daemon = True
-        self.audio_sender_thread.daemon = True
-        self.audio_receiver_thread.start()
-        self.audio_sender_thread.start()
-
-    def audio_receiver(self):
-        if self.connection_type == 'client':
-            self.audio_receiver = MultiUserAudioRecv(self.host, self.port+1)
-        else:
-            self.audio_receiver = MultiUserAudioRecv(self.host, self.port)
-
-    def audio_sender(self):
-        if self.connection_type == 'client':
-            self.audio_sender = MultiUserAudioSend(self.host, self.port)
-        else:
-            self.audio_sender = MultiUserAudioSend(self.host, self.port+1)
-    
-    
-class MultiUserMain(object):
-    def __init__(self, connection_type, host, port):
-        self.curr_buf = [""]
-        self.port = port
-        self.host = host
-        self.thread = threading.Thread(target=self.main_loop, args = ())
-        self.thread.daemon = True
-        self.connection_type = connection_type
-    def run(self):
-        self.thread.start()
-        start_multiuser_emitter(self.host, self.port, self.connection_type)
-        return
-
-    def main_loop(self):
-        if (self.connection_type == 'server'):
-            self.server = MultiUserServer(self.host, self.port)
-        else:
-            self.client_reader = MultiUserClientReader(self.host, self.port)
-        asyncore.loop()
-
-
+"""
+Set up functions (called directly from vim_multiuser.vim)
+"""
 def start_multiuser_server(port):
-    multiuser = MultiUserMain('server', '0.0.0.0', port)
-    multiuser.run() 
+    global MUConnection
+    MUConnection = MUServer('localhost', port)
+    comm = threading.Thread(target=asyncore.loop,kwargs={'map':session_list})
+    comm.daemon = True
+    comm.start()
 
 def start_multiuser_client(host, port):
-    multiuser = MultiUserMain('client', host, port)
-    multiuser.run()
+    global MUConnection
+    MUConnection = MUClient(host, port)
+    comm = threading.Thread(target=asyncore.loop)
+    comm.daemon = True
+    comm.start()
 
-def start_multiuser_emitter(host, port, conn_type):
-    global emitter
-    global connection_type
-    if emitter != None: return
-    connection_type = conn_type
-    emitter = MultiUserClientSender(host, port, conn_type)
+"""
+multiuser_client_send:
 
-def start_multiuser_audio(host, port, connection_type):
-    audio = MultiUserAudioMain(connection_type, host, port)
+    This function determines what has changed in the file
+    and then sends that data.
 
-
+    Called on all cursor movement.
+    
+TODO:
+    - Call on all key inputs
+    - Better determine what has changed
+    
+"""
 def multiuser_client_send():
     global old_buffer
-    if emitter == None: return
+    global MUConnection
+    
+    # Get the current buffer
     current_buffer = list(vim.current.buffer)
-    buffer_length = min(len(current_buffer), len(old_buffer))
+    
+    # Set up variable for emitting
     to_send = dict()
-    to_send['timestamp'] = str(time.time()) + str(random.randint(0, 10000))
+    
+    # Bools for quick checks
     equal_length = len(current_buffer) == len(old_buffer)
     deleting = len(current_buffer) + 1 == len(old_buffer)
-    inserting = len(current_buffer) == len(old_buffer) + 1
+    inserting = not equal_length and not deleting
+    
+    # Get the cursor position
     row,col = vim.current.window.cursor
+    
+    # Scan for changes if length is equal
     changed = False
     if (equal_length):
         for i in xrange(len(current_buffer)):
@@ -95,21 +66,60 @@ def multiuser_client_send():
                 break
     else:
         changed = True
+        
+    # No changes? We can return
     if not changed:
         old_buffer = current_buffer
         return
-    if row-1 < len(old_buffer) and current_buffer[row-1] != old_buffer[row-1] and equal_length:
-        to_send['line'] = current_buffer[row-1]
-        to_send['line_num'] = row-1
+
+    # Changes, but no insert or delete
+    if (equal_length
+      and current_buffer[row-1] != old_buffer[row-1]
+      and row-1 < len(old_buffer)):
+        line = current_buffer[row-1]
+        line_num = row-1
+        update_line(line, line_num)
+        
+        
+    # Maybe insert, maybe delete
     elif not(equal_length):
+        
         # we are inserting
         if (inserting):
-            to_send['line'] = ''
-            to_send['insert'] = row-1
+            line = current_buffer[row-1]
+            line_num = row-1
+            prev_line = current_buffer[row-2]
+            insert_line(line, prev_line, line_num)
+            
         # we are deleting
         elif (deleting):
-            to_send['delete'] = row
-    old_buffer = current_buffer
-    if ('line' in to_send or 'delete' in to_send):
-        emitter.send_message(to_send)
+            prev_line = current_buffer[row-1]
+            delete_line(prev_line, row)
 
+    # Store the buffer
+    old_buffer = current_buffer
+
+"""
+Utility functions for creating messages to send
+"""
+
+def insert_line(line, prev_line, line_num):
+    to_send = dict()
+    to_send['line'] = line
+    to_send['insert'] = line_num
+    MUConnection.send_message(to_send)
+    if (line_num > 0):
+        update_line(prev_line, line_num-1)
+
+def delete_line(prev_line, line_num):
+    to_send = dict()
+    to_send['delete'] = line_num
+    MUConnection.send_message(to_send)
+    if (line_num > 0):
+        update_line(prev_line, line_num-1)
+    
+def update_line(line, line_num):
+    to_send = dict()
+    to_send['line'] = line
+    to_send['line_num'] = line_num
+    MUConnection.send_message(to_send)
