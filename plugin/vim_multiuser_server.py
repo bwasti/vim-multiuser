@@ -35,7 +35,10 @@ def parse_data(data):
             #vim_list = list(vim.current.buffer)
             #vim_list.insert(line_num, line)
             vim.current.buffer[line_num+1:] = vim.current.buffer[line_num:]
-            vim.current.buffer[line_num] = line
+            if line_num >= len(vim.current.buffer):
+                vim.current.buffer[line_num:] = [line]
+            else:
+                vim.current.buffer[line_num] = line
             row, col = vim.current.window.cursor
             #if (line_num <= row and row+1 <= len(vim.current.buffer)):
              #   vim.current.window.cursor = (row+1,col)
