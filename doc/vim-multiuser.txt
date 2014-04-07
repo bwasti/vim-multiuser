@@ -8,7 +8,8 @@ CONTENTS                                                        *vim-multiuser*
 ===============================================================================
 1. Intro                                                  *vim-multiuser-intro*
 
-This plugin was built to allow vanilla vim users to collaborate with other users.
+This plugin was built to allow vanilla vim users to collaborate with other\
+users in real time on the same file.
 
 2. Requirements                                    *vim-multiuser-requirements*
 
