@@ -1,6 +1,6 @@
 import socket
 import asyncore, asynchat
-import sys
+import sys, time
 import vim
 import json
 
@@ -20,10 +20,11 @@ def parse_data(data):
         if ('line_num' in recv_data and 'line' in recv_data):
             line_num = recv_data[u'line_num']
             line = recv_data[u'line'].encode('ascii', 'ignore')
-            vim_list = list(vim.current.buffer)
-            vim.current.buffer[:] = (
-                    [elem if i!=line_num 
-                        else line for i,elem in enumerate(vim_list)])
+            vim.current.buffer[line_num] = line
+            #vim_list = list(vim.current.buffer)
+            #vim.current.buffer[:] = (
+            #        [elem if i!=line_num 
+            #            else line for i,elem in enumerate(vim_list)])
         elif ('body' in recv_data):
             vim_list = recv_data[u'body']
             vim.current.buffer[:] = (
@@ -31,19 +32,20 @@ def parse_data(data):
         elif ('insert' in recv_data):
             line_num = recv_data[u'insert']
             line = recv_data[u'line'].encode('ascii', 'ignore')
-            vim_list = list(vim.current.buffer)
-            vim_list.insert(line_num, line)
-            vim.current.buffer[:] = vim_list
+            #vim_list = list(vim.current.buffer)
+            #vim_list.insert(line_num, line)
+            vim.current.buffer[line_num+1:] = vim.current.buffer[line_num:]
+            vim.current.buffer[line_num] = line
             row, col = vim.current.window.cursor
             #if (line_num <= row and row+1 <= len(vim.current.buffer)):
              #   vim.current.window.cursor = (row+1,col)
         elif ('delete' in recv_data):
             line_num = recv_data[u'delete']
-            vim_list = list(vim.current.buffer)
-            if (line_num < len(vim_list)):
-                vim_list.pop(line_num)
-            vim.current.buffer[:] = vim_list
-            row, col = vim.current.window.cursor
+            #vim_list = list(vim.current.buffer)
+            #if (line_num < len(vim_list)):
+            #    vim_list.pop(line_num)
+            del vim.current.buffer[line_num] #= vim_list
+            #row, col = vim.current.window.cursor
             #if (line_num <= row and row-1 > 0):
              #   vim.current.window.cursor = (row-1,col)
         #vim.current.window.cursor = cursor
@@ -56,19 +58,19 @@ class MultiUserSession(asynchat.async_chat):
     def __init__(self, sock, server, session_id):
         asynchat.async_chat.__init__(self, sock)
         self.server = server
-        self.ibuffer = []
-        self.obuffer = ""
-        self.vbuffer = []
+        #self.ibuffer = []
+        #self.obuffer = ""
+        #self.vbuffer = []
         self.set_terminator("\r\n\r\n")
         self.session_id = session_id
     
     def collect_incoming_data(self, data):
-        self.ibuffer.append(data)
+        #self.ibuffer.append(data)
         self.server.broadcast(data, self.session_id)
         parse_data(data)
 
     def found_terminator(self):
-        self.ibuffer = []
+        #self.ibuffer = []
         self.handle_request()
 
     def handle_close(self):
@@ -102,7 +104,7 @@ class MultiUserServer(asyncore.dispatcher):
             session = MultiUserSession(sock, self, self.session_id)
             global sessions
             session.push(json.dumps({'body':list(vim.current.buffer),'timestamp':'yeezus'}))
-            sessions.append(session)
+            if session not in sessions: sessions.append(session)
 
 class MultiUserClientReader(asyncore.dispatcher):
     def __init__(self, host, port):
@@ -121,6 +123,7 @@ class MultiUserClientReader(asyncore.dispatcher):
 
     def handle_read(self):
         data = self.recv(8192)
+        time.sleep(100.0/1000.0)
         parse_data(data)
 
 class MultiUserClientSender(object):

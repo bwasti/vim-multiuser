@@ -68,21 +68,17 @@ def start_multiuser_client(host, port):
 def start_multiuser_emitter(host, port, conn_type):
     global emitter
     global connection_type
+    if emitter != None: return
     connection_type = conn_type
     emitter = MultiUserClientSender(host, port, conn_type)
 
 def start_multiuser_audio(host, port, connection_type):
     audio = MultiUserAudioMain(connection_type, host, port)
 
-time_to_set = 0
 
 def multiuser_client_send():
     global old_buffer
-    global time_to_set
-    time_to_set = time_to_set + 1 % 10
     if emitter == None: return
-    if time_to_set == 0:
-        emitter.send_message({'body':list(vim.current.buffer),'timestamp':'123123'});
     current_buffer = list(vim.current.buffer)
     buffer_length = min(len(current_buffer), len(old_buffer))
     to_send = dict()
