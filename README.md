@@ -2,6 +2,8 @@
 
 <img src="https://livechan.net/tmp/uploads/31769-x4c7f9.gif"></img>
 
+You can try it out by connecting to `bwasti.com` on port `1337`.
+
 ## Installation
 
 Use your plugin manager of choice.
