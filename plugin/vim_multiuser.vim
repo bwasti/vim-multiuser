@@ -15,6 +15,7 @@ autocmd CursorMoved * :call MultiUserCursorMoved()
 endfunction
 
 function! MultiUserServer(arg1)
+hi CursorHighlight ctermbg=DarkBlue ctermfg=White guibg=DarkBlue guifg=White gui=bold term=bold cterm=bold
 :call SetupMovementDetection()
 python << EOF
 
@@ -29,6 +30,7 @@ EOF
 endfunction
 
 function! MultiUserClient(arg1, arg2)
+hi CursorHighlight ctermbg=DarkBlue ctermfg=White guibg=DarkBlue guifg=White gui=bold term=bold cterm=bold
 :call SetupMovementDetection()
 python << EOF
 
