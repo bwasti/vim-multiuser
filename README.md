@@ -1,5 +1,7 @@
 # vim-multiuser
 
+<img src="https://livechan.net/tmp/uploads/31769-x4c7f9.gif"></img>
+
 ## Installation
 
 Use your plugin manager of choice.
