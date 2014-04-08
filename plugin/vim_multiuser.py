@@ -22,7 +22,7 @@ def start_multiuser_server(port, name=""):
     else:
         user_name = "User"+str(random.randint(0,100000))
     global MUConnection
-    MUConnection = MUServer('localhost', port, parse_data)
+    MUConnection = MUServer('0.0.0.0', port, parse_data)
     comm = threading.Thread(target=asyncore.loop,kwargs={'map':session_list})
     comm.daemon = True
     comm.start()
