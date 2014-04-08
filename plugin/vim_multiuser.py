@@ -82,7 +82,6 @@ def parse_data(data):
 
         # Full body update --> swap entire buffer
         elif ('body' in recv_data):
-            old_buffer = []
             vim_list = recv_data[u'body']
             vim.current.buffer[:] = (
                     [vim_list[i].encode('ascii', 'ignore') 
@@ -105,6 +104,9 @@ def parse_data(data):
         elif ('delete' in recv_data):
             line_num = recv_data[u'delete']
             del vim.current.buffer[line_num]
+        
+        # Buffer has been updated, save that fact
+        old_buffer = list(vim.current.buffer)
 
         vim.command(":redraw")
 
@@ -131,6 +133,9 @@ def multiuser_client_send():
     global MUConnection
     global old_tick
     
+    if MUConnection == None:
+        return
+    
     # Send cursor data
     update_cursor(*vim.current.window.cursor)
             
@@ -145,9 +150,13 @@ def multiuser_client_send():
     current_buffer = list(vim.current.buffer)
     
     # Bools for quick checks
-    equal_length = len(current_buffer) == len(old_buffer)
-    deleting = len(current_buffer) + 1 == len(old_buffer)
-    inserting = not equal_length and not deleting
+    c_b_len = len(current_buffer)
+    o_b_len = len(old_buffer)
+    equal_length = c_b_len == o_b_len
+    deleting = c_b_len + 1 == o_b_len
+    inserting = c_b_len == o_b_len + 1
+    large_insert = c_b_len > o_b_len and not inserting
+    large_delete = c_b_len < o_b_len and not deleting
     
     # Get the cursor position
     row,col = vim.current.window.cursor
@@ -164,17 +173,29 @@ def multiuser_client_send():
     # Maybe insert, maybe delete
     elif not equal_length and not old_buffer == []:
         
-        # we are inserting
+        # we are inserting one line
         if (inserting):
             line = current_buffer[row-1]
             line_num = row-1
             prev_line = current_buffer[row-2]
             insert_line(line, prev_line, line_num)
             
-        # we are deleting
+        # we are deleting one line
         elif (deleting):
             prev_line = current_buffer[row-1]
             delete_line(prev_line, row)
+        
+        # we are inserting multiple lines
+        elif (large_insert):
+            MUConnection.send_message({
+            'body':list(vim.current.buffer)
+            })
+            
+        # we are deleting multiple lines
+        elif (large_delete):
+            MUConnection.send_message({
+            'body':list(vim.current.buffer)
+            })
 
     # Store the buffer
     old_buffer = current_buffer
