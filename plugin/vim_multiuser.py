@@ -2,6 +2,7 @@ import vim
 import threading
 from vim_multiuser_server import *
 import random
+import difflib
 
 """
 Globals
@@ -47,7 +48,7 @@ parse_data:
 
 TODO:
 
-    - Cursor handling
+    - Refactor code for clarity
 
 """
 def parse_data(data):
@@ -74,12 +75,6 @@ def parse_data(data):
                 'v.\%'+str(recv_data[u'cursor_row'])+
                 'l\', 1, '+str(user_id)+')')
 
-        # Line update --> simply swap out line with new one
-        elif ('line_num' in recv_data and 'line' in recv_data):
-            line_num = recv_data[u'line_num']
-            line = recv_data[u'line'].encode('ascii', 'ignore')
-            vim.current.buffer[line_num] = line
-
         # Full body update --> swap entire buffer
         elif ('body' in recv_data):
             vim_list = recv_data[u'body']
@@ -87,25 +82,14 @@ def parse_data(data):
                     [vim_list[i].encode('ascii', 'ignore') 
                         for i in xrange(len(vim_list))])
 
-        # Insert new line --> insert line and shift everything else down
-        # TODO: move cursor with it
-        elif ('insert' in recv_data):
-            line_num = recv_data[u'insert']
-            line = recv_data[u'line'].encode('ascii', 'ignore')
+        elif ('type' in recv_data):
+            head = vim.current.buffer[:recv_data['start']]
+            tail = vim.current.buffer[recv_data['end']:]
+            mid = [x.encode('ascii','ignore') for x in recv_data['new_section']]
+            vim.current.buffer[:] = head + mid + tail
 
-            vim.current.buffer[line_num+1:] = vim.current.buffer[line_num:]
-            if line_num >= len(vim.current.buffer):
-                vim.current.buffer[line_num:] = [line]
-            else:
-                vim.current.buffer[line_num] = line
-
-        # Delete line --> remove line
-        # TODO: move cursor appropriately
-        elif ('delete' in recv_data):
-            line_num = recv_data[u'delete']
-            del vim.current.buffer[line_num]
-        
         # Buffer has been updated, save that fact
+        global old_buffer
         old_buffer = list(vim.current.buffer)
 
         vim.command(":redraw")
@@ -121,11 +105,7 @@ multiuser_client_send:
     This function determines what has changed in the file
     and then sends that data.
 
-    Called on all cursor movement.
-    
-TODO:
-    - Call on all key inputs
-    - Better determine what has changed
+    Called on all key presses.
     
 """
 def multiuser_client_send():
@@ -149,85 +129,36 @@ def multiuser_client_send():
     # Get the current buffer
     current_buffer = list(vim.current.buffer)
     
-    # Bools for quick checks
-    c_b_len = len(current_buffer)
-    o_b_len = len(old_buffer)
-    equal_length = c_b_len == o_b_len
-    deleting = c_b_len + 1 == o_b_len
-    inserting = c_b_len == o_b_len + 1
-    large_insert = c_b_len > o_b_len and not inserting
-    large_delete = c_b_len < o_b_len and not deleting
-    
-    # Get the cursor position
-    row,col = vim.current.window.cursor
-
-    # Changes, but no insert or delete
-    if (equal_length
-      and current_buffer[row-1] != old_buffer[row-1]
-      and row-1 < len(old_buffer)):
-        line = current_buffer[row-1]
-        line_num = row-1
-        update_line(line, line_num)
-        
-        
-    # Maybe insert, maybe delete
-    elif not equal_length and not old_buffer == []:
-        
-        # we are inserting one line
-        if (inserting):
-            line = current_buffer[row-1]
-            line_num = row-1
-            prev_line = current_buffer[row-2]
-            insert_line(line, prev_line, line_num)
-            
-        # we are deleting one line
-        elif (deleting):
-            prev_line = current_buffer[row-1]
-            delete_line(prev_line, row)
-        
-        # we are inserting multiple lines
-        elif (large_insert):
-            MUConnection.send_message({
-            'body':list(vim.current.buffer)
-            })
-            
-        # we are deleting multiple lines
-        elif (large_delete):
-            MUConnection.send_message({
-            'body':list(vim.current.buffer)
-            })
-
-    # Store the buffer
+    run_diff(old_buffer, current_buffer)
     old_buffer = current_buffer
+    return
 
 """
 Utility functions for creating messages to send
 """
 
-def insert_line(line, prev_line, line_num):
-    to_send = dict()
-    to_send['line'] = line
-    to_send['insert'] = line_num
-    MUConnection.send_message(to_send)
-    if (line_num > 0):
-        update_line(prev_line, line_num-1)
+def run_diff(old, new):
+    matcher = difflib.SequenceMatcher(None, old, new)
+    for tag, old_start, old_end, new_start, new_end in reversed(matcher.get_opcodes()):
+        if tag == 'delete':
+            insert_range(old_start, old_end, [])
+        if tag == 'insert':
+            insert_range(old_start, old_end, new[new_start:new_end])
+        if tag == 'replace':
+            insert_range(old_start, old_end, new[new_start:new_end])
 
-def delete_line(prev_line, line_num):
+def insert_range(old_start, old_end, new_section):
     to_send = dict()
-    to_send['delete'] = line_num
+    to_send['type'] = "insert_range"
+    to_send['start'] = old_start
+    to_send['end'] = old_end
+    to_send['new_section'] = new_section
     MUConnection.send_message(to_send)
-    if (line_num > 0):
-        update_line(prev_line, line_num-1)
-    
-def update_line(line, line_num):
-    to_send = dict()
-    to_send['line'] = line
-    to_send['line_num'] = line_num
-    MUConnection.send_message(to_send)
-    
+
 def update_cursor(row, col):
     global user_name
     to_send = dict()
+    to_send['type'] = "cursor"
     to_send['user_name'] = user_name
     to_send['cursor_row'] = row
     to_send['cursor_col'] = col
