@@ -1,6 +1,6 @@
 # vim-multiuser
 
-<img src="https://livechan.net/tmp/uploads/31769-x4c7f9.gif"></img>
+<video src="http://bwasti.com/static/images/vim-multiuser.webm"></video>
 
 You can try it out by connecting to `bwasti.com` on port `1337`.
 
